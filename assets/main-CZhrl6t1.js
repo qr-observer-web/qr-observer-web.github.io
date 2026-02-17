@@ -3620,6 +3620,150 @@ const progressAnimation = {
 if (typeof window !== "undefined") {
   progressAnimation.init();
 }
+function getApiBaseUrl$1() {
+  const host = window.location.hostname;
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+  return isLocal ? "http://localhost:8080" : "https://api.qrobserver.com";
+}
+function setStatus$1(el, message, isError) {
+  if (!el) return;
+  el.textContent = message;
+  el.classList.remove("hidden");
+  el.classList.toggle("text-red-500", Boolean(isError));
+  el.classList.toggle("text-green-600", false);
+}
+function clearStatus$1(el) {
+  if (!el) return;
+  el.textContent = "";
+  el.classList.add("hidden");
+  el.classList.remove("text-red-500");
+  el.classList.remove("text-green-600");
+}
+function initEmailListCtaV2() {
+  const form = document.getElementById("email-list-form-cta-v2");
+  if (!form) return;
+  const statusEl = document.getElementById("email-list-status-cta-v2");
+  const successEl = document.getElementById("email-list-success-cta-v2");
+  const inputEl = form.querySelector("#userEmail-cta-v2");
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const submitBtnLabel = submitBtn == null ? void 0 : submitBtn.querySelector("span");
+  const originalBtnText = submitBtnLabel == null ? void 0 : submitBtnLabel.textContent;
+  const setSubmitting = (isSubmitting) => {
+    if (!submitBtn) return;
+    submitBtn.disabled = Boolean(isSubmitting);
+    submitBtn.classList.toggle("opacity-60", Boolean(isSubmitting));
+    submitBtn.classList.toggle("cursor-not-allowed", Boolean(isSubmitting));
+    if (submitBtnLabel && originalBtnText) {
+      submitBtnLabel.textContent = isSubmitting ? "Submitting…" : originalBtnText;
+    }
+  };
+  form.addEventListener("submit", async (e) => {
+    var _a;
+    e.preventDefault();
+    clearStatus$1(statusEl);
+    const email = ((_a = inputEl == null ? void 0 : inputEl.value) == null ? void 0 : _a.trim()) || "";
+    if (!email) {
+      setStatus$1(statusEl, "Something went wrong. Please try again.", true);
+      return;
+    }
+    const apiBase = getApiBaseUrl$1();
+    const url = `${apiBase}/emails/lists`;
+    try {
+      setSubmitting(true);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
+      });
+      if (res.ok) {
+        form.classList.add("hidden");
+        if (successEl) successEl.classList.remove("hidden");
+      } else {
+        setStatus$1(statusEl, "Something went wrong. Please try again.", true);
+        setSubmitting(false);
+      }
+    } catch {
+      setStatus$1(statusEl, "Something went wrong. Please try again.", true);
+      setSubmitting(false);
+    } finally {
+      if (!form.classList.contains("hidden")) {
+        setSubmitting(false);
+      }
+    }
+  });
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initEmailListCtaV2);
+} else {
+  initEmailListCtaV2();
+}
+function getApiBaseUrl() {
+  const host = window.location.hostname;
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+  return isLocal ? "http://localhost:8080" : "https://api.qrobserver.com";
+}
+function setStatus(el, message, isError) {
+  if (!el) return;
+  el.textContent = message;
+  el.classList.remove("hidden");
+  el.classList.toggle("text-red-500", Boolean(isError));
+  el.classList.toggle("text-green-600", false);
+}
+function clearStatus(el) {
+  if (!el) return;
+  el.textContent = "";
+  el.classList.add("hidden");
+  el.classList.remove("text-red-500");
+  el.classList.remove("text-green-600");
+}
+function initSupportContactForm() {
+  const form = document.getElementById("support-contact-form");
+  if (!form) return;
+  const statusEl = document.getElementById("support-contact-status");
+  const successEl = document.getElementById("support-contact-success");
+  const submitBtn = form.querySelector('button[type="submit"]');
+  form.addEventListener("submit", async (e) => {
+    var _a, _b, _c, _d, _e, _f;
+    e.preventDefault();
+    clearStatus(statusEl);
+    const name = ((_b = (_a = form.querySelector("#fullname")) == null ? void 0 : _a.value) == null ? void 0 : _b.trim()) || "";
+    const email = ((_d = (_c = form.querySelector("#email")) == null ? void 0 : _c.value) == null ? void 0 : _d.trim()) || "";
+    const message = ((_f = (_e = form.querySelector("#message")) == null ? void 0 : _e.value) == null ? void 0 : _f.trim()) || "";
+    if (!name || !email || !message) {
+      setStatus(statusEl, "Please fill in all fields.", true);
+      return;
+    }
+    const apiBase = getApiBaseUrl();
+    const url = `${apiBase}/emails/supports`;
+    try {
+      if (submitBtn) submitBtn.disabled = true;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, message })
+      });
+      if (res.ok) {
+        form.classList.add("hidden");
+        if (successEl) successEl.classList.remove("hidden");
+      } else {
+        setStatus(statusEl, "Email wasn't sent. Try again later.", true);
+      }
+    } catch {
+      setStatus(statusEl, "Email wasn't sent. Try again later.", true);
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initSupportContactForm);
+} else {
+  initSupportContactForm();
+}
 const initRevealElements = () => {
   const elements = document.querySelectorAll("[data-ns-animate]");
   const Springer = window.Springer.default;
